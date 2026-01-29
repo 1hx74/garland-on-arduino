@@ -1,12 +1,3 @@
-#pragma once
-#include <Arduino.h>
-
-struct InputState {
-  uint16_t lightSensor;
-  uint16_t knobAngle;
-  
-  bool buttonPressed;
-  bool buttonClick;
-  bool buttonDoubleClick;
-  bool buttonLongPress;
-};
+It will be an Arduino garland.
+Assembly diagrams, code, and a 3D model of the case.
+Easy addition of new effects is expected.
