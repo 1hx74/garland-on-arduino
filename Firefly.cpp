@@ -16,7 +16,6 @@ public:
 
         // init fireflies
         for (int i = 0; i < numLeds; i++) {
-            fireflies[i].alive = random(100) >= deadLedPercent;
             fireflies[i].brightness = 0;
             fireflies[i].color = colors[random(sizeof(colors)/sizeof(colors[0]))];
         }
@@ -31,24 +30,20 @@ public:
         lastMillis = now;
 
         for (int i = 0; i < numLeds; i++) {
-            if (fireflies[i].alive) {
-                // light up new firefly
-                if (fireflies[i].brightness == 0 && random(100) < 15) {
-                    fireflies[i].brightness = 50 + random(206);
-                    fireflies[i].color = colors[random(sizeof(colors)/sizeof(colors[0]))];
-                }
+            // light up new firefly
+            if (fireflies[i].brightness == 0 && random(100) < 15) {
+                fireflies[i].brightness = 50 + random(206);
+                fireflies[i].color = colors[random(sizeof(colors)/sizeof(colors[0]))];
+            }
 
-                leds[i] = fireflies[i].color;
-                leds[i].nscale8(fireflies[i].brightness);
+            leds[i] = fireflies[i].color;
+            leds[i].nscale8(fireflies[i].brightness);
 
-                // fade out
-                if (fireflies[i].brightness > fadeAmount) {
-                    fireflies[i].brightness -= fadeAmount;
-                } else {
-                    fireflies[i].brightness = 0;
-                }
+            // fade out
+            if (fireflies[i].brightness > fadeAmount) {
+                fireflies[i].brightness -= fadeAmount;
             } else {
-                leds[i] = CRGB::Black;
+                fireflies[i].brightness = 0;
             }
         }
     }
@@ -61,14 +56,13 @@ private:
     struct FireflyData {
         CRGB color;
         uint8_t brightness;
-        bool alive;
     };
 
     FireflyData* fireflies;
 
-    static const int deadLedPercent = 10;  // always off
     static const int fadeAmount = 15;      // fade speed
-    CRGB colors[6] = {
+    CRGB colors[7] = {
+        CRGB(0, 0, 0),         // black
         CRGB(0, 100, 255),     // blue
         CRGB(255, 50, 200),    // neon pink
         CRGB(255, 150, 50),    // beige-orange
