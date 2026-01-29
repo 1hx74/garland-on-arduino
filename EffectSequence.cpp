@@ -1,7 +1,8 @@
 #include "EffectSequence.h"
+#include "Firefly.cpp"
 
 EffectSequence::EffectSequence() {
-    //sequence[0] = new Any();
+    sequence[0] = new Firefly();
     idx = 0;
 }
 

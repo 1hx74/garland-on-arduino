@@ -31,7 +31,7 @@ void Input::update() {
     // long click
     if (current && !state.buttonLongPress && (now - lastPressTime) >= LONGPRESS_MS) {
         state.buttonLongPress = true;
-        clickCount = 0; // отменяем клики
+        clickCount = 0;
     }
 
     // unclick
