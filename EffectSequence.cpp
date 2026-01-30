@@ -1,8 +1,12 @@
 #include "EffectSequence.h"
 #include "Firefly.cpp"
+#include "Bulbs.cpp"
+#include "Wave.cpp"
 
 EffectSequence::EffectSequence() {
     sequence[0] = new Firefly();
+    sequence[1] = new Bulbs();
+    sequence[2] = new Wave();
     idx = 0;
 }
 

@@ -3,6 +3,9 @@
 #include "Input.h"
 #include "EffectSequence.h"
 
+#define DAY_BRIGHTNESS    190
+#define NIGHT_BRIGHTNESS  100
+
 #define P_BUTTON 8
 #define P_KNOB   A0
 #define P_LIGHT  A5 
@@ -29,7 +32,7 @@ void setup() {
   nowEffect->begin(leds, NUM_LEDS);
 
   FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
-  FastLED.setBrightness(120);
+  FastLED.setBrightness(DAY_BRIGHTNESS);
 }
 
 
@@ -55,5 +58,6 @@ void loop() {
 
   uint16_t knobValue = nowState.knobAngle;
   nowEffect->update(knobValue);
+  
   FastLED.show();
 }
