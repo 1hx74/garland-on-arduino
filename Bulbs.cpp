@@ -8,7 +8,7 @@ public:
     void begin(CRGB* ledsArray, int num_leds) override {
         leds = ledsArray;
         numLeds = num_leds;
-        lastMillis = millis();
+        lastMillis = millis() - 10000;  // for force start
         state = false;
     }
 

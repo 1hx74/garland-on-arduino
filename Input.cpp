@@ -4,69 +4,89 @@ Input::Input(int buttonPin, int knobPin, int lightPin)
   : buttonPin(buttonPin),
     knobPin(knobPin),
     lightPin(lightPin),
-    lastButtonState(false),
-    lastPressTime(0),
+    btnState(IDLE),
+    pressStartTime(0),
     lastClickTime(0),
-    clickCount(0)
+    clickCount(0),
+    filteredKnob(0),
+    filteredLight(0)
 {
 }
 
 void Input::begin() {
-  state = {};
+    pinMode(buttonPin, INPUT_PULLUP);
+    pinMode(knobPin, INPUT);
+    pinMode(lightPin, INPUT);
+
+    state = {};
+    filteredKnob = analogRead(knobPin);
+    filteredLight = analogRead(lightPin);
 }
 
 void Input::update() {
     state.buttonClick = false;
     state.buttonDoubleClick = false;
     state.buttonLongPress = false;
+    state.buttonLongLongPress = false;
+    state.buttonPressed = false;
 
     bool current = (digitalRead(buttonPin) == LOW);
     unsigned long now = millis();
 
-    // click
-    if (current && !lastButtonState) {
-        lastPressTime = now;
+    switch (btnState) {
+        case IDLE:
+            if (current) {
+                btnState = PRESS;
+                pressStartTime = now;
+            } else if (clickCount > 0 && (now - lastClickTime) >= DOUBLECLICK_MS) {
+                if (clickCount == 1) state.buttonClick = true;
+                else if (clickCount >= 2) state.buttonDoubleClick = true;
+                clickCount = 0;
+            }
+            break;
+
+        case PRESS:
+            if (!current) {
+                if ((now - pressStartTime) < LONGPRESS_MS) {
+                    clickCount++;
+                    lastClickTime = now;
+                }
+                btnState = IDLE;
+            } else if ((now - pressStartTime) >= LONGPRESS_MS) {
+                btnState = LONG;
+                state.buttonLongPress = true;
+            }
+            break;
+
+        case LONG:
+            if (!current) {
+                btnState = IDLE;
+            } else if ((now - pressStartTime) >= LONGLONGPRESS_MS) {
+                btnState = LONGLONG;
+                state.buttonLongLongPress = true;
+            }
+            break;
+
+        case LONGLONG:
+            if (!current) {
+                btnState = IDLE;
+            }
+            break;
     }
 
-    // long click
-    if (current && !state.buttonLongPress && (now - lastPressTime) >= LONGPRESS_MS) {
-        state.buttonLongPress = true;
-        clickCount = 0;
-    }
-
-    // unclick
-    if (!current && lastButtonState) {
-        if ((now - lastPressTime) < LONGPRESS_MS) {
-            clickCount++;
-            lastClickTime = now;
-        }
-    }
-
-    // processed click
-    if (clickCount > 0) {
-        if ((now - lastClickTime) >= DOUBLECLICK_MS) {
-            if (clickCount == 1) state.buttonClick = true;
-            else state.buttonDoubleClick = true;
-            clickCount = 0;
-        }
-    }
-
-    lastButtonState = current;
     state.buttonPressed = current;
 
-    // analog sensors
-    static float filteredKnob = analogRead(knobPin);
-    static float filteredLight = analogRead(lightPin);
-
+    // analog + filter
     int rawKnob = analogRead(knobPin);
-    filteredKnob = 0.1f * rawKnob + 0.9f * filteredKnob;
+    filteredKnob = FILTER_ALPHA * rawKnob + (1 - FILTER_ALPHA) * filteredKnob;
     state.knobAngle = (uint16_t)filteredKnob;
 
     int rawLight = analogRead(lightPin);
-    filteredLight = 0.1f * rawLight + 0.9f * filteredLight;
+    filteredLight = FILTER_ALPHA * rawLight + (1 - FILTER_ALPHA) * filteredLight;
     state.lightSensor = (uint16_t)filteredLight;
 }
 
+
 const InputState& Input::getState() const {
-  return state;
+    return state;
 }

@@ -2,28 +2,39 @@
 #include <Arduino.h>
 #include "InputState.h"
 
-#define LONGPRESS_MS    1000
-#define DOUBLECLICK_MS  400
-#define FILTER_ALPHA    0.1f
+#define LONGPRESS_MS       1000
+#define LONGLONGPRESS_MS   3000
+#define DOUBLECLICK_MS     400
+#define FILTER_ALPHA       0.4f
+
+enum ButtonState {
+    IDLE,
+    PRESS,
+    LONG,
+    LONGLONG,
+    RELEASE,
+    CLICK_CHECK
+};
 
 class Input {
-  public:
+public:
     Input(int buttonPin, int knobPin, int lightPin);
-    //~Input();
-
     void begin();
     void update();
     const InputState& getState() const;
 
-  private:
+private:
     int buttonPin;
     int knobPin;
     int lightPin;
 
     InputState state;
 
-    bool lastButtonState;
-    unsigned long lastPressTime;
+    ButtonState btnState;
+    unsigned long pressStartTime;
     unsigned long lastClickTime;
     int clickCount;
+
+    float filteredKnob;
+    float filteredLight;
 };

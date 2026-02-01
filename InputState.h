@@ -9,4 +9,5 @@ struct InputState {
   bool buttonClick;
   bool buttonDoubleClick;
   bool buttonLongPress;
+  bool buttonLongLongPress;
 };
