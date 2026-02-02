@@ -3,6 +3,8 @@
 #include "Input.h"
 #include "EffectSequence.h"
 
+#define DEMO_INTERVAL   30000
+
 enum class FSMState {
     LOAD,
     AUTO,
@@ -26,4 +28,6 @@ private:
     Effect*& nowEffect;
     CRGB* leds;
     uint16_t numLeds;
+
+    unsigned long demoLastSwitch = 0;
 };

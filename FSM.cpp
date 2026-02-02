@@ -20,6 +20,8 @@ void FSM::setState(FSMState newState) {
 void FSM::update() {
     if (!state) return;
 
+    uint16_t knobValue = state->knobAngle;
+
     switch (fsmState) {
 
         case FSMState::LOAD:
@@ -46,15 +48,30 @@ void FSM::update() {
                 // todo -> add/rm fav.
             }
             else if (state->buttonLongLongPress) {
-                // todo -> demo
+                demoLastSwitch = millis();
+                setState(FSMState::DEMO);
             }
 
-            uint16_t knobValue = state->knobAngle;
             nowEffect->update(knobValue);
             break;
 
-        case FSMState::DEMO:
-            // all anim. auto run
+        case FSMState::DEMO: 
+            unsigned long now = millis();
+
+            if (state->buttonClick || state->buttonDoubleClick) {
+                setState(FSMState::MANUAL);
+                break;
+            }
+
+            if (now - demoLastSwitch >= DEMO_INTERVAL) {
+                demoLastSwitch = now;
+                
+                nowEffect = effectSequence.next();
+                nowEffect->begin(leds, numLeds);
+            }
+
+            nowEffect->update(knobValue);
+
             break;
     }
 }
