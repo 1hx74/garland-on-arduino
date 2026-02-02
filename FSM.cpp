@@ -1,7 +1,8 @@
 #include "FSM.h"
 
-FSM::FSM(EffectSequence& effectSequence, Effect*& nowEffect, CRGB* leds, uint16_t NUM_LEDS)
-    : fsmState(FSMState::MANUAL),
+FSM::FSM(InputState* state, EffectSequence& effectSequence, Effect*& nowEffect, CRGB* leds, uint16_t NUM_LEDS)
+    : fsmState(FSMState::LOAD),
+      state(state),
       effectSequence(effectSequence),
       nowEffect(nowEffect),
       leds(leds),
@@ -16,11 +17,16 @@ void FSM::setState(FSMState newState) {
     fsmState = newState;
 }
 
-void FSM::update(InputState& state) {
+void FSM::update() {
+    if (!state) return;
+
     switch (fsmState) {
 
         case FSMState::LOAD:
             // todo begin anim. and block click
+            nowEffect = effectSequence.current();
+            nowEffect->begin(leds, numLeds);
+            setState(FSMState::MANUAL);
             break;
 
         case FSMState::AUTO:
@@ -28,22 +34,22 @@ void FSM::update(InputState& state) {
             break;
 
         case FSMState::MANUAL:
-            if (state.buttonClick) {
+            if (state->buttonClick) {
                 nowEffect = effectSequence.next();
                 nowEffect->begin(leds, numLeds);
             } 
-            else if (state.buttonDoubleClick) {
+            else if (state->buttonDoubleClick) {
                 nowEffect = effectSequence.prev();
                 nowEffect->begin(leds, numLeds);
             } 
-            else if (state.buttonLongPress) {
+            else if (state->buttonLongPress) {
                 // todo -> add/rm fav.
             }
-            else if (state.buttonLongLongPress) {
+            else if (state->buttonLongLongPress) {
                 // todo -> demo
             }
 
-            uint16_t knobValue = state.knobAngle;
+            uint16_t knobValue = state->knobAngle;
             nowEffect->update(knobValue);
             break;
 

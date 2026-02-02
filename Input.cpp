@@ -1,7 +1,8 @@
 #include "Input.h"
 
-Input::Input(int buttonPin, int knobPin, int lightPin)
-  : buttonPin(buttonPin),
+Input::Input(InputState* outState, int buttonPin, int knobPin, int lightPin)
+  : outState(outState),
+    buttonPin(buttonPin),
     knobPin(knobPin),
     lightPin(lightPin),
     btnState(IDLE),
@@ -84,9 +85,6 @@ void Input::update() {
     int rawLight = analogRead(lightPin);
     filteredLight = FILTER_ALPHA * rawLight + (1 - FILTER_ALPHA) * filteredLight;
     state.lightSensor = (uint16_t)filteredLight;
-}
 
-
-const InputState& Input::getState() const {
-    return state;
+    *outState = state;
 }

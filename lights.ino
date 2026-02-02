@@ -16,19 +16,16 @@
 
 CRGB leds[NUM_LEDS];
 
-Input input(P_BUTTON, P_KNOB, P_LIGHT);
 InputState nowState;
+Input input(&nowState, P_BUTTON, P_KNOB, P_LIGHT);
 
 EffectSequence effectSequence;
 Effect* nowEffect = nullptr;
 
-FSM fsm(effectSequence, nowEffect, leds, NUM_LEDS);
+FSM fsm(&nowState, effectSequence, nowEffect, leds, NUM_LEDS);
 
 void setup() {
   input.begin();
-
-  nowEffect = effectSequence.current();
-  nowEffect->begin(leds, NUM_LEDS);
 
   FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
   FastLED.setBrightness(DAY_BRIGHTNESS);
@@ -37,9 +34,8 @@ void setup() {
 
 void loop() {
   input.update();
-  nowState = input.getState();
 
-  fsm.update(nowState);
+  fsm.update();
   
   FastLED.show();
 }

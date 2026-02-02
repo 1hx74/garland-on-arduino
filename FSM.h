@@ -12,15 +12,16 @@ enum class FSMState {
 
 class FSM {
 public:
-    FSM(EffectSequence& seq, Effect*& currentEffect, CRGB* leds, uint16_t numLeds);
+    FSM(InputState* state, EffectSequence& seq, Effect*& currentEffect, CRGB* leds, uint16_t numLeds);
 
-    void update(InputState& state);
+    void update();
     FSMState getState() const;
     void setState(FSMState newState);
 
 private:
     FSMState fsmState;
 
+    InputState* state;
     EffectSequence& effectSequence;
     Effect*& nowEffect;
     CRGB* leds;

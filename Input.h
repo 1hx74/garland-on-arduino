@@ -18,10 +18,9 @@ enum ButtonState {
 
 class Input {
 public:
-    Input(int buttonPin, int knobPin, int lightPin);
+    Input(InputState* outState, int buttonPin, int knobPin, int lightPin);
     void begin();
     void update();
-    const InputState& getState() const;
 
 private:
     int buttonPin;
@@ -29,6 +28,7 @@ private:
     int lightPin;
 
     InputState state;
+    InputState* outState;
 
     ButtonState btnState;
     unsigned long pressStartTime;
