@@ -1,7 +1,7 @@
 #pragma once
 #include "Effect.h"
 
-#define EFFECT_COUNT    3
+#define EFFECT_COUNT    5
 
 class EffectSequence {
   public:
