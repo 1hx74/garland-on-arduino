@@ -5,15 +5,33 @@ class Vintage : public Effect {
 public:
     Vintage() {}
 
+    ~Vintage() {
+        // free dynamic memory
+        delete[] currentColors;
+        delete[] targetColors;
+        delete[] chosen;
+    }
+
     void begin(CRGB* leds, int num_leds) override {
         this->leds = leds;
         this->num_leds = num_leds;
+
+        // allocate exactly for real number of leds
+        if (!bAlloc) {
+            currentColors = new CRGB[num_leds];
+            targetColors  = new CRGB[num_leds];
+            chosen        = new bool[num_leds];
+            bAlloc = true;
+        }
+
         for (int i = 0; i < num_leds; i++) {
             targetColors[i] = CRGB::Black;
             currentColors[i] = CRGB::Black;
+            chosen[i] = false;
         }
-        lastRelayTime = millis();
+
         relayInterval = chooseRelayInterval();
+        lastRelayTime = millis() - relayInterval;
     }
 
     void update(uint16_t value) override {
@@ -38,7 +56,10 @@ public:
             }
 
             // mask
-            bool chosen[100] = { false };
+            for (int i = 0; i < num_leds; i++) {
+                chosen[i] = false;
+            }
+
             int count = 0;
 
             // 1) which are not extinguished
@@ -54,7 +75,13 @@ public:
                 int i = random(0, num_leds);
                 if (chosen[i]) continue;
 
-                int colorIndex = random(0, 4);
+                // avoid same color clusters
+                int colorIndex;
+                for (int tries = 0; ; tries++) {
+                    colorIndex = chooseColorIndex();
+                    if (!sameNeighborColor(i, colorIndex) || tries >= 2) break;
+                }
+
                 int level = chooseLevel();
                 float brightnessFactor = brightnessLevel(level);
 
@@ -88,8 +115,11 @@ private:
     CRGB* leds;
     int num_leds;
 
-    CRGB currentColors[100];
-    CRGB targetColors[100];
+    CRGB* currentColors;
+    CRGB* targetColors;
+    bool* chosen;
+
+    bool bAlloc = false;
 
     unsigned long lastRelayTime;
     unsigned long relayInterval;
@@ -139,12 +169,42 @@ private:
     const int relayWeightSum = 23;
 
     int chooseRelayInterval() {
-        int r = random(relayWeightSum); // 0..22
+        int r = random(relayWeightSum);
         int sum = 0;
         for (int i = 0; i < 7; i++) {
             sum += relayWeights[i];
             if (r < sum) return relayTimes[i];
         }
         return relayTimes[3];
+    }
+
+    // color distribution
+    const int colorWeights[4] = {
+        6,  // amber
+        5,  // green
+        2,  // blue
+        4   // red
+    };
+    const int colorWeightSum = 17;
+
+    int chooseColorIndex() {
+        int r = random(colorWeightSum);
+        int sum = 0;
+        for (int i = 0; i < 4; i++) {
+            sum += colorWeights[i];
+            if (r < sum) return i;
+        }
+        return 0;
+    }
+
+    // neighbor color check
+    bool sameNeighborColor(int index, int colorIndex) {
+        if (index > 0 && chosen[index - 1]) {
+            if (targetColors[index - 1] == color[colorIndex]) return true;
+        }
+        if (index < num_leds - 1 && chosen[index + 1]) {
+            if (targetColors[index + 1] == color[colorIndex]) return true;
+        }
+        return false;
     }
 };

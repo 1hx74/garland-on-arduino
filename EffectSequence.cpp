@@ -2,15 +2,13 @@
 #include "Firefly.cpp"
 #include "Bulbs.cpp"
 #include "Wave.cpp"
-#include "Embers.cpp"
 #include "Vintage.cpp"
 
 EffectSequence::EffectSequence() {
     sequence[0] = new Firefly();
     sequence[1] = new Bulbs();
     sequence[2] = new Wave();
-    sequence[3] = new Embers();
-    sequence[4] = new Vintage();
+    sequence[3] = new Vintage();
     idx = 0;
 }
 

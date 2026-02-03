@@ -4,7 +4,7 @@
 #include "EffectSequence.h"
 #include "FSM.h"
 
-#define DAY_BRIGHTNESS    190
+#define DAY_BRIGHTNESS    100
 #define NIGHT_BRIGHTNESS  100
 
 #define P_BUTTON 8

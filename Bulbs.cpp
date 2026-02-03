@@ -24,7 +24,8 @@ public:
         state = !state;
 
         CRGB red    = CRGB(255, 0, 0);
-        CRGB orange = CRGB(255, 120, 0);
+        //CRGB orange = CRGB(255, 120, 0);
+        CRGB orange = CRGB(255, 60, 10);
 
         for (int i = 0; i < numLeds; i++) {
             bool even = (i % 2 == 0);

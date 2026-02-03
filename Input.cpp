@@ -10,7 +10,9 @@ Input::Input(InputState* outState, int buttonPin, int knobPin, int lightPin)
     lastClickTime(0),
     clickCount(0),
     filteredKnob(0),
-    filteredLight(0)
+    filteredLight(0),
+    lastRawButton(HIGH),
+    lastDebounceTime(0)
 {
 }
 
@@ -24,6 +26,20 @@ void Input::begin() {
     filteredLight = analogRead(lightPin);
 }
 
+// for debounce
+bool Input::readButton() {
+    bool currentRaw = digitalRead(buttonPin);
+    if (currentRaw != lastRawButton) {
+        lastDebounceTime = millis();
+    }
+    lastRawButton = currentRaw;
+
+    if ((millis() - lastDebounceTime) > DEBOUNCE_MS) {
+        return (currentRaw == LOW);
+    }
+    return (btnState != IDLE && btnState != LONG && btnState != LONGLONG); // держим прежнее состояние при дребезге
+}
+
 void Input::update() {
     state.buttonClick = false;
     state.buttonDoubleClick = false;
@@ -31,7 +47,7 @@ void Input::update() {
     state.buttonLongLongPress = false;
     state.buttonPressed = false;
 
-    bool current = (digitalRead(buttonPin) == LOW);
+    bool current = readButton();
     unsigned long now = millis();
 
     switch (btnState) {
@@ -53,7 +69,7 @@ void Input::update() {
                     lastClickTime = now;
                 }
                 btnState = IDLE;
-            } else if ((now - pressStartTime) >= LONGPRESS_MS) {
+            } else if ((now - pressStartTime) >= LONGPRESS_MS && (now - pressStartTime) < LONGLONGPRESS_MS) {
                 btnState = LONG;
                 state.buttonLongPress = true;
             }
@@ -64,6 +80,7 @@ void Input::update() {
                 btnState = IDLE;
             } else if ((now - pressStartTime) >= LONGLONGPRESS_MS) {
                 btnState = LONGLONG;
+                state.buttonLongPress = false;
                 state.buttonLongLongPress = true;
             }
             break;

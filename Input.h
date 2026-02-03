@@ -6,6 +6,7 @@
 #define LONGLONGPRESS_MS   3000
 #define DOUBLECLICK_MS     400
 #define FILTER_ALPHA       0.4f
+#define DEBOUNCE_MS 30
 
 enum ButtonState {
     IDLE,
@@ -37,4 +38,8 @@ private:
 
     float filteredKnob;
     float filteredLight;
+
+    bool lastRawButton;
+    unsigned long lastDebounceTime;
+    bool readButton();
 };

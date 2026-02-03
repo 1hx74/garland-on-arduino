@@ -24,7 +24,7 @@ public:
         uint8_t hue = map(value, 0, 1023, 0, 255); // color
 
         for (int i = 0; i < numLeds; i++) {
-            uint8_t wave = sin8(i * 16 + offset);
+            uint8_t wave = sin8((numLeds - 1 - i) * 16 + offset);
 
             // blending for black areas
             uint8_t brightness = qsub8(wave, 60);
